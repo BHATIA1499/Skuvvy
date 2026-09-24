@@ -810,9 +810,20 @@ footer { background: #1A1A26; padding: 56px 48px 32px; border-top: 1px solid rgb
    Solid paper · one green accent · 12px radius · crisp cards.
    Retires the pastel gradient, frosted glass and floating bubbles. */
 .brandv2{--paper:#F5F4F1;--line:#E5E4E0;--ink:#1E1E2A;--green:#7DAA75;--green-d:#6B9A63}
-/* clean, professional hero — no floating pastel decoration */
-.hero-charts,.bubble-arena,.data-bg,.dbg,.cta-chart{display:none!important}
-.headline-bubble{background:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;border:none!important;box-shadow:none!important;padding-top:8px!important}
+/* clean hero — keep the metric bubbles, drop the busy chart layers */
+.hero-charts,.data-bg,.dbg,.cta-chart{display:none!important}
+/* bubbles are back — monochrome green glass, not the rainbow */
+.bubble{background:rgba(125,170,117,0.10)!important}
+.bubble-stat{color:#4A7A42!important}
+.bubble-label{color:#5C7A54!important}
+/* expand content to fill the page — remove the 1140px glass panel that created the side negative space */
+.panel{max-width:none!important;background:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important}
+.feat-inner,.how-inner,.stats-inner,.demo-inner,.pricing-inner,.foot-grid,.foot-bottom{max-width:1340px!important}
+/* pricing: restore frosted-glass cards over a subtle green wash */
+.pricing-section{background:linear-gradient(150deg,#EEF4EC 0%,#F5F4F1 55%,#EAF1E8 100%)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+.pricing-section::before{display:none!important}
+.pricing-section .gc{background:rgba(255,255,255,.60)!important;-webkit-backdrop-filter:blur(16px)!important;backdrop-filter:blur(16px)!important;border:1px solid rgba(255,255,255,.85)!important;box-shadow:0 10px 40px rgba(30,30,45,.10)!important}
+.headline-bubble{background:rgba(255,255,255,.66)!important;-webkit-backdrop-filter:blur(20px)!important;backdrop-filter:blur(20px)!important;border:1px solid rgba(255,255,255,.85)!important;box-shadow:0 12px 48px rgba(30,30,45,.10)!important}
 .headline-bubble::before{display:none!important}
 /* one radius, strong green */
 .btn,.nav-cta,.mob-cta,.btn-mint,.btn-outline,.btn-ghost,.btn-white{border-radius:12px!important}
