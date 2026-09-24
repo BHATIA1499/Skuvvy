@@ -779,7 +779,7 @@ footer { background: #1A1A26; padding: 56px 48px 32px; border-top: 1px solid rgb
      overflows and fragments behind content on small screens. Keep the soft
      gradient, drop the noise. */
   .data-bg{display:none}
-  .bubble-arena{display:none}
+  /* bubbles kept on mobile too — scaled down in JS (see SC factor) */
 }
 @media(max-width:900px){
   #nav{padding:0 16px}
@@ -1876,20 +1876,22 @@ function boom(x,y) {
   const arenaEl = arena;
   const bubbleEls = [];
   const states = [];
+  // On phones the bubbles are shrunk so they read as ambient decoration, not clutter
+  const SC = window.matchMedia('(max-width: 768px)').matches ? 0.56 : 1;
 
   BUBBLES.forEach((b, i) => {
     const el = document.createElement('div');
     el.className = 'bubble';
     Object.assign(el.style, {
-      width: b.size + 'px', height: b.size + 'px',
+      width: b.size*SC + 'px', height: b.size*SC + 'px',
       background: b.tint, borderColor: b.border,
       position: 'absolute', left: '0px', top: '0px',
       opacity: '0',
     });
     el.innerHTML = `<div class="bubble-inner">
-      ${b.stat ? `<div class="bubble-stat" style="font-size:${b.fs}px;color:${b.statColor}">${b.stat}</div>` : ''}
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="opacity:0.8;flex-shrink:0">${b.icon}</svg>
-      <div class="bubble-label" style="font-size:${b.ls}px;color:${b.labelColor};max-width:${b.size*0.72}px">${b.label}</div>
+      ${b.stat ? `<div class="bubble-stat" style="font-size:${(b.fs*SC).toFixed(1)}px;color:${b.statColor}">${b.stat}</div>` : ''}
+      <svg width="${20*SC}" height="${20*SC}" viewBox="0 0 24 24" fill="none" style="opacity:0.8;flex-shrink:0">${b.icon}</svg>
+      <div class="bubble-label" style="font-size:${(b.ls*SC).toFixed(1)}px;color:${b.labelColor};max-width:${b.size*0.72*SC}px">${b.label}</div>
     </div>`;
     el.addEventListener('click', () => {
       if (el.classList.contains('bursting')) return;
@@ -1913,10 +1915,10 @@ function boom(x,y) {
       // Each bubble gets a fully independent random vertical centre (10%–90% of height)
       const yCenter = (0.10 + Math.random() * 0.80) * H;
       // Primary bounce: large amplitude so bubbles drift across full arena height
-      const amp1   = 80  + Math.random() * 160;   // 80–240 px
+      const amp1   = (80  + Math.random() * 160) * SC;   // 80–240 px (scaled on mobile)
       const freq1  = 0.006 + Math.random() * 0.010; // slow undulation
       // Secondary drift: very slow large wave adds wandering quality
-      const amp2   = 50  + Math.random() * 100;
+      const amp2   = (50  + Math.random() * 100) * SC;
       const freq2  = 0.002 + Math.random() * 0.004;
       // Tiny wobble for organic feel
       const amp3   = 8   + Math.random() * 12;
@@ -1924,13 +1926,13 @@ function boom(x,y) {
       // Horizontal speed varies so faster bubbles pass slower ones
       const speed  = 1.4 + Math.random() * 2.8;
       // Stagger start positions across the full width
-      const startX = (i / BUBBLES.length) * (W + b.size * 2) - b.size;
+      const startX = (i / BUBBLES.length) * (W + b.size*SC * 2) - b.size*SC;
       // Random phase offsets so they never start in sync
       const phase1 = Math.random() * Math.PI * 2;
       const phase2 = Math.random() * Math.PI * 2;
       const phase3 = Math.random() * Math.PI * 2;
 
-      states.push({ yCenter, amp1, freq1, amp2, freq2, amp3, freq3, speed, x: startX, phase1, phase2, phase3, size: b.size });
+      states.push({ yCenter, amp1, freq1, amp2, freq2, amp3, freq3, speed, x: startX, phase1, phase2, phase3, size: b.size*SC });
       bubbleEls[i].style.opacity = '1';
     });
 
