@@ -864,6 +864,11 @@ footer { background: #1A1A26; padding: 56px 48px 32px; border-top: 1px solid rgb
 .hero-badge{background:#fff!important;border:1px solid #E5E4E0!important;color:#4A7A42!important;box-shadow:0 4px 16px rgba(30,30,45,.10)!important}
 /* Hero catchphrase on its own bolder line */
 .hero-tagline{display:block!important;margin-top:12px!important;font-family:var(--heading)!important;font-weight:700!important;font-size:19px!important;color:#1E1E2A!important;line-height:1.35!important}
+/* How It Works: 2x2 grid on mobile/tablet instead of a single stacked column */
+@media(max-width:900px){
+  #how-it-works .steps-row{display:grid!important;grid-template-columns:1fr 1fr!important;gap:12px!important}
+  #how-it-works .step-card{padding:18px 16px!important}
+}
 </style>
 </head>
 <body>
