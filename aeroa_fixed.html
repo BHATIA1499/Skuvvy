@@ -45,8 +45,7 @@ html { scroll-behavior: smooth; }
 body {
   font-family: var(--body); color: var(--text);
   -webkit-font-smoothing: antialiased; overflow-x: hidden;
-  background: linear-gradient(135deg, #E8F0FF 0%, #FFE8F0 35%, #E8F5EC 65%, #EDE8FF 100%);
-  background-attachment: fixed;
+  background: #F5F4F1;
 }
 ::selection { background: var(--mint); color: white; }
 ::-webkit-scrollbar { width: 4px; }
@@ -806,6 +805,44 @@ footer { background: #1A1A26; padding: 56px 48px 32px; border-top: 1px solid rgb
   .hero-btns .btn{width:100%;justify-content:center}
   .foot-grid{gap:24px;text-align:left}
 }
+
+/* ═══════════ BRAND v2 ALIGNMENT ═══════════
+   Solid paper · one green accent · 12px radius · crisp cards.
+   Retires the pastel gradient, frosted glass and floating bubbles. */
+.brandv2{--paper:#F5F4F1;--line:#E5E4E0;--ink:#1E1E2A;--green:#7DAA75;--green-d:#6B9A63}
+/* clean, professional hero — no floating pastel decoration */
+.hero-charts,.bubble-arena,.data-bg,.dbg,.cta-chart{display:none!important}
+.headline-bubble{background:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;border:none!important;box-shadow:none!important;padding-top:8px!important}
+.headline-bubble::before{display:none!important}
+/* one radius, strong green */
+.btn,.nav-cta,.mob-cta,.btn-mint,.btn-outline,.btn-ghost,.btn-white{border-radius:12px!important}
+.btn-mint,.nav-cta,.mob-cta{background:#7DAA75!important;color:#fff!important;box-shadow:0 3px 12px rgba(125,170,117,.32)!important}
+.btn-mint:hover,.nav-cta:hover,.mob-cta:hover{background:#6B9A63!important;box-shadow:0 6px 18px rgba(125,170,117,.4)!important}
+/* crisp white cards — no glass */
+.gc,.feat-card{background:#fff!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;border:1px solid #E5E4E0!important;border-radius:12px!important;box-shadow:0 1px 2px rgba(30,30,42,.04),0 4px 14px rgba(30,30,42,.05)!important}
+.gc:hover,.feat-card:hover{transform:translateY(-3px)!important;box-shadow:0 10px 30px rgba(30,30,42,.10)!important;border-color:#E5E4E0!important}
+/* unify feature icons to a single green — fewer colours */
+.feat-icon{background:rgba(125,170,117,.12)!important;border-radius:12px!important}
+.feat-icon svg{stroke:#7DAA75!important}
+.h1-pill{background:rgba(125,170,117,.14)!important}
+/* neutralise pastel section washes → clean white on paper */
+.feat-section,.pricing-section{background:#fff!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;border-top:1px solid #E5E4E0!important}
+.feat-section::before,.pricing-section::before{display:none!important}
+.feat-card::before{background:#7DAA75!important}
+/* AI chat mock → brand green, not the mint→blush blend */
+.chat-top{background:#7DAA75!important}
+.msg.ai .av{background:#7DAA75!important}
+/* stat figures → one green accent (was green/blush/peri/peach) */
+.stat-v{color:#7DAA75!important}
+.stat-card{border-top-color:#7DAA75!important}
+/* pricing buttons → 12px + single green (retire the periwinkle plan CTA) */
+.plan-btn{border-radius:12px!important}
+.pb-fill,.pb-peri{background:#7DAA75!important;color:#fff!important;border-color:#7DAA75!important}
+.pb-fill:hover,.pb-peri:hover{background:#6B9A63!important}
+.toggle-track{background:#7DAA75!important}
+/* copilot demo list icons → unified green */
+.dp-ic{background:rgba(125,170,117,.12)!important}
+.dp-ic svg{stroke:#7DAA75!important}
 </style>
 </head>
 <body>
