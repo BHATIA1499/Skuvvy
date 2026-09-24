@@ -860,6 +860,10 @@ footer { background: #1A1A26; padding: 56px 48px 32px; border-top: 1px solid rgb
 #security .feat-card p{font-size:12.5px!important;line-height:1.6!important}
 @media(max-width:960px){#security .feat-cards{grid-template-columns:repeat(2,1fr)!important}#security .feat-card{aspect-ratio:auto!important}}
 @media(max-width:560px){#security .feat-cards{grid-template-columns:1fr!important}}
+/* Hero badge: solid filled pill so it reads clearly over the bubbles */
+.hero-badge{background:#fff!important;border:1px solid #E5E4E0!important;color:#4A7A42!important;box-shadow:0 4px 16px rgba(30,30,45,.10)!important}
+/* Hero catchphrase on its own bolder line */
+.hero-tagline{display:block!important;margin-top:12px!important;font-family:var(--heading)!important;font-weight:700!important;font-size:19px!important;color:#1E1E2A!important;line-height:1.35!important}
 </style>
 </head>
 <body>
@@ -1178,7 +1182,7 @@ footer { background: #1A1A26; padding: 56px 48px 32px; border-top: 1px solid rgb
       Your AI<br>
       merchandising assistant.
     </h1>
-    <p class="hero-sub">Upload your trading data and get clear, commercial answers in minutes — what to reorder, what to mark down, and where the margin is. Like a senior merchandiser, on call.</p>
+    <p class="hero-sub">Upload your trading data and get clear, commercial answers in minutes — what to reorder, what to mark down, and where the margin is.<span class="hero-tagline">Like a senior merchandiser, on call.</span></p>
     <div class="hero-btns">
       <a href="/signup" class="btn btn-mint">Start 14-day free trial</a>
       <a href="#" class="btn btn-outline" id="open-demo-btn" onclick="openDemoModal();return false;">View sample analysis →</a>
