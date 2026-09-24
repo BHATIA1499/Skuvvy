@@ -854,6 +854,12 @@ footer { background: #1A1A26; padding: 56px 48px 32px; border-top: 1px solid rgb
 /* copilot demo list icons → unified green */
 .dp-ic{background:rgba(125,170,117,.12)!important}
 .dp-ic svg{stroke:#7DAA75!important}
+/* Security section: all four cards on ONE row, square boxes (no empty second row) */
+#security .feat-cards{grid-template-columns:repeat(4,1fr)!important;gap:16px!important}
+#security .feat-card{aspect-ratio:1/1!important;display:flex!important;flex-direction:column!important;justify-content:flex-start!important;overflow:visible!important;padding:26px 22px!important}
+#security .feat-card p{font-size:12.5px!important;line-height:1.6!important}
+@media(max-width:960px){#security .feat-cards{grid-template-columns:repeat(2,1fr)!important}#security .feat-card{aspect-ratio:auto!important}}
+@media(max-width:560px){#security .feat-cards{grid-template-columns:1fr!important}}
 </style>
 </head>
 <body>
