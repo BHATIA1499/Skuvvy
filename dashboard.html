@@ -4217,15 +4217,30 @@ function updateTopNav(dest){
 let ccData = null;
 let ccView = 'command';   // 'command' | 'meeting'
 function setCommandView(v){ ccView = v; renderCommandCentre(ccData); window.scrollTo({top:0,behavior:'smooth'}); }
+function ccNoDataCTA(){
+  return '<div class="ws-empty">'
+    + '<div class="ic">🧭</div>'
+    + '<div class="t">Your Command Centre is ready when your data is</div>'
+    + '<div style="margin-bottom:18px">Upload a trading file or explore with sample data to see prioritised actions, commercial impact, and the decision simulator.</div>'
+    + '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">'
+    +   '<button onclick="document.getElementById(\'file-input\').click()" style="background:#7DAA75;color:#fff;border:none;border-radius:12px;padding:11px 20px;font-weight:600;font-size:13px;cursor:pointer">Upload data</button>'
+    +   '<button onclick="viewSampleDataset()" style="background:#fff;color:#4A7A42;border:1px solid #E5E4E0;border-radius:12px;padding:11px 20px;font-weight:600;font-size:13px;cursor:pointer">✨ Try Sample Data</button>'
+    + '</div></div>';
+}
 async function loadCommandCentre(uploadId){
   const wrap = document.getElementById('cc-wrap');
+  const id = uploadId || currentUploadId || (sampleMode?SAMPLE_WS.current_upload_id:'');
+  // No dataset loaded yet — guide the user instead of throwing an error.
+  if(!id && !sampleMode){ wrap.innerHTML = ccNoDataCTA(); return; }
   wrap.innerHTML = '<div class="ws-empty"><div class="ic">⏳</div><div class="t">Building your decision view…</div></div>';
   try {
-    const id = uploadId || currentUploadId || (sampleMode?SAMPLE_WS.current_upload_id:'');
     ccData = await wsApi('GET','/api/workspace/command'+(id?('?upload_id='+id):''));
     renderCommandCentre(ccData);
   } catch(e){
-    wrap.innerHTML = '<div class="ws-empty"><div class="ic">⚠️</div><div class="t">Could not build Command Centre</div><div>'+escapeHtml(e.message)+'</div></div>';
+    // "No analysis / no data" isn't a failure — show the same friendly prompt.
+    const noData = /no analysis|no data|not found|available/i.test(e.message||'');
+    wrap.innerHTML = noData ? ccNoDataCTA()
+      : '<div class="ws-empty"><div class="ic">⚠️</div><div class="t">Could not build Command Centre</div><div>'+escapeHtml(e.message)+'</div></div>';
   }
 }
 // ── Monday Trading Review (Trading Meeting Mode) ──────────────
