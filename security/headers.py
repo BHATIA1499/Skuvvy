@@ -136,6 +136,10 @@ def apply_security_headers(app: Flask) -> None:
             h["Cache-Control"] = "no-store, no-cache, must-revalidate, private"
             h["Pragma"]        = "no-cache"
             h["Expires"]       = "0"
+        # Always revalidate HTML pages so a new deploy is picked up immediately
+        # (browsers still get a fast 304 when the page hasn't changed).
+        elif (response.mimetype or "") == "text/html":
+            h["Cache-Control"] = "no-cache, must-revalidate"
 
         # Remove server fingerprinting headers
         h.remove("Server")
