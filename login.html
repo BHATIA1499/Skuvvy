@@ -302,20 +302,36 @@ body{background:#F5F4F1!important}
       <div class="footer-link">Don't have an account? <a href="/signup">Sign up free</a></div>
     </div>
 
-    <!-- STEP 2: Forgot password -->
+    <!-- STEP 2: Forgot password — 6-digit code + new password -->
     <div class="step" id="step-forgot">
       <h1>Reset password</h1>
-      <p class="sub">Enter your email and we'll send you a reset link</p>
+      <p class="sub" id="forgot-sub">Enter your email and we'll send you a 6-digit code.</p>
 
       <div class="error" id="err-forgot"></div>
-      <div class="success-note" id="reset-ok">Check your inbox — a reset link is on its way.</div>
+      <div class="success-note" id="reset-ok">A 6-digit code is on its way to your inbox.</div>
 
-      <div class="field">
-        <label for="reset-email">Email Address</label>
-        <input type="email" id="reset-email" placeholder="you@brand.com" autocomplete="email" onkeydown="if(event.key==='Enter')doForgot()">
+      <!-- phase 1: request the code -->
+      <div id="forgot-request">
+        <div class="field">
+          <label for="reset-email">Email Address</label>
+          <input type="email" id="reset-email" placeholder="you@brand.com" autocomplete="email" onkeydown="if(event.key==='Enter')doForgot()">
+        </div>
+        <button class="btn" id="btn-forgot" onclick="doForgot()">Send Code →</button>
       </div>
 
-      <button class="btn" id="btn-forgot" onclick="doForgot()">Send Reset Link →</button>
+      <!-- phase 2: enter code + choose a new password -->
+      <div id="forgot-reset" style="display:none">
+        <div class="field">
+          <label for="reset-code">Verification Code</label>
+          <input type="text" id="reset-code" placeholder="000000" maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code">
+        </div>
+        <div class="field">
+          <label for="reset-newpass">New Password</label>
+          <input type="password" id="reset-newpass" placeholder="At least 8 characters" autocomplete="new-password" onkeydown="if(event.key==='Enter')doResetWithCode()">
+        </div>
+        <button class="btn" id="btn-reset" onclick="doResetWithCode()">Reset Password →</button>
+        <div class="forgot-link" style="margin-top:14px">Didn't get it? <a onclick="doForgot(true)">Resend code</a></div>
+      </div>
 
       <div class="back-link"><a onclick="showLogin()">← Back to log in</a></div>
     </div>
@@ -434,6 +450,8 @@ body{background:#F5F4F1!important}
 function showForgot() {
   document.getElementById('step-login').classList.remove('active');
   document.getElementById('step-forgot').classList.add('active');
+  document.getElementById('forgot-request').style.display = 'block';
+  document.getElementById('forgot-reset').style.display = 'none';
   document.getElementById('reset-email').focus();
   document.getElementById('err-forgot').style.display = 'none';
   document.getElementById('reset-ok').style.display = 'none';
@@ -481,7 +499,8 @@ async function doLogin() {
   }
 }
 
-async function doForgot() {
+let forgotEmail = '';
+async function doForgot(isResend) {
   const email  = document.getElementById('reset-email').value.trim();
   const btn    = document.getElementById('btn-forgot');
   const errBox = document.getElementById('err-forgot');
@@ -493,8 +512,8 @@ async function doForgot() {
     errBox.textContent = 'Please enter your email address.';
     errBox.style.display = 'block'; return;
   }
-
-  btn.disabled = true; btn.textContent = 'Sending…';
+  forgotEmail = email;
+  if (!isResend) { btn.disabled = true; btn.textContent = 'Sending…'; }
 
   try {
     const res  = await fetch('/auth/forgot-password', {
@@ -503,13 +522,59 @@ async function doForgot() {
       body: JSON.stringify({ email }),
     });
     const data = await res.json();
-    okBox.textContent = data.message || 'If that email exists, a reset link has been sent.';
+    // Reveal the code + new-password phase.
+    document.getElementById('forgot-request').style.display = 'none';
+    document.getElementById('forgot-reset').style.display = 'block';
+    document.getElementById('forgot-sub').textContent = 'Enter the 6-digit code we emailed you and choose a new password.';
+    okBox.textContent = data.message || 'If that email is registered, a 6-digit code is on its way.';
     okBox.style.display = 'block';
-    btn.disabled = false; btn.textContent = 'Send Reset Link →';
+    document.getElementById('reset-code').focus();
   } catch {
     errBox.textContent = 'Connection error. Please try again.';
     errBox.style.display = 'block';
-    btn.disabled = false; btn.textContent = 'Send Reset Link →';
+  }
+  btn.disabled = false; btn.textContent = 'Send Code →';
+}
+
+async function doResetWithCode() {
+  const token   = document.getElementById('reset-code').value.trim();
+  const newpass = document.getElementById('reset-newpass').value;
+  const btn     = document.getElementById('btn-reset');
+  const errBox  = document.getElementById('err-forgot');
+  errBox.style.display = 'none';
+
+  if (!/^\d{6}$/.test(token)) {
+    errBox.textContent = 'Please enter the 6-digit code from your email.';
+    errBox.style.display = 'block'; return;
+  }
+  if (!newpass || newpass.length < 8) {
+    errBox.textContent = 'Choose a password with at least 8 characters, one uppercase letter and one number.';
+    errBox.style.display = 'block'; return;
+  }
+
+  btn.disabled = true; btn.textContent = 'Resetting…';
+  try {
+    const res  = await fetch('/auth/reset-with-code', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      credentials:'include',
+      body: JSON.stringify({ email: forgotEmail, token, password: newpass }),
+    });
+    const data = await res.json();
+    if (data.ok && data.redirect) {
+      window.location.href = data.redirect; return;
+    }
+    if (data.ok) {
+      errBox.style.color = ''; // fall through to login
+      showLogin();
+      return;
+    }
+    errBox.textContent = data.error || 'Invalid or expired code — please try again.';
+    errBox.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Reset Password →';
+  } catch {
+    errBox.textContent = 'Connection error. Please try again.';
+    errBox.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Reset Password →';
   }
 }
 </script>

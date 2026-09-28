@@ -1770,7 +1770,7 @@ def auth_forgot_password():
     # ONE generic response whether or not the email is registered — this is the
     # only thing the endpoint may ever say, so it can't be used to enumerate.
     _generic = jsonify({"ok": True,
-                        "message": "If that email is registered, you'll receive a reset link"})
+                        "message": "If that email is registered, a 6-digit code is on its way."})
     try:
         data = ForgotPasswordSchema.model_validate(request.get_json(silent=True) or {})
     except ValidationError:
@@ -1816,6 +1816,59 @@ def do_reset_password():
     except Exception as e:
         app.logger.error(f"Reset password error: {e}")
         return jsonify({"error": "Reset link has expired. Please request a new one."}), 400
+
+
+@app.route("/auth/reset-with-code", methods=["POST"])
+@auth_limit()  # OTP brute-force protection: 10/min per IP
+def auth_reset_with_code():
+    """
+    Forgot-password via 6-digit code: verify the recovery OTP that /auth/forgot-
+    password emailed, set the new password, and log the user straight in.
+    (Supabase's "Reset Password" email template must include {{ .Token }} so the
+    email carries the 6-digit code rather than only a link.)
+    """
+    body  = request.get_json(silent=True) or {}
+    email = sanitise_raw(str(body.get("email", "")), "email").lower()
+    token = str(body.get("token", "")).strip()
+    new_password = body.get("password", "")
+
+    # Validate email format + short numeric OTP + new-password strength.
+    if not validate_email(email) or not (token.isdigit() and 4 <= len(token) <= 8):
+        return jsonify({"error": "Invalid or expired code — please try again"}), 400
+    ok, _ = validate_password(new_password)
+    if not ok:
+        return jsonify({"error": "Please choose a password with at least 8 characters, "
+                                 "one uppercase letter and one number."}), 400
+
+    try:
+        res = supabase.auth.verify_otp({"email": email, "token": token, "type": "recovery"})
+        if not (res and getattr(res, "user", None)):
+            return jsonify({"error": "Invalid or expired code — please try again"}), 400
+
+        # Set the new password via the admin API (service key) — thread-safe.
+        supabase.auth.admin.update_user_by_id(res.user.id, {"password": new_password})
+        audit.log(USER_LOGIN, request=request, user_id=res.user.id,
+                  metadata={"email": email, "method": "password_reset"})
+
+        # Log them straight in if the recovery gave us a session (matches how
+        # /auth/verify-email establishes the session).
+        if getattr(res, "session", None):
+            meta  = res.user.user_metadata or {}
+            _name = meta.get("full_name", email.split("@")[0])
+            plan, trial_ends = ensure_profile(res.user.id, email, _name)
+            session["user_id"]         = res.user.id
+            session["user_email"]      = email
+            session["user_name"]       = _name
+            session["user_plan"]       = plan
+            session["user_trial_ends"] = trial_ends
+            session["access_token"]    = res.session.access_token
+            session["refresh_token"]   = res.session.refresh_token
+            csrf_token = generate_csrf_token()
+            return jsonify({"ok": True, "redirect": "/dashboard", "csrf_token": csrf_token})
+        return jsonify({"ok": True, "message": "Password updated — you can now log in"})
+    except Exception as e:
+        app.logger.error(f"Reset-with-code error: {e}")
+        return jsonify({"error": "Invalid or expired code — please try again"}), 400
 
 
 @app.route("/auth/verify-email", methods=["POST"])
